@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:kalender/kalender.dart';
-import 'package:kalender/src/enumerations.dart';
 import 'package:kalender/src/models/calendar_events/draggable_event.dart';
 import 'package:kalender/src/widgets/draggable/new_draggable.dart';
 
 /// This widget generates draggable widgets for each visible day.
 /// - These draggable widgets are used to create new events.
 ///
-class DayEventDraggableWidgets<T extends Object?> extends NewDraggableWidget<T> {
+class DayEventDraggableWidgets<T extends Object?>
+    extends NewDraggableWidget<T> {
   final MultiDayBodyConfiguration bodyConfiguration;
   final DateTimeRange visibleDateTimeRange;
   final TimeOfDayRange timeOfDayRange;
@@ -32,7 +32,6 @@ class DayEventDraggableWidgets<T extends Object?> extends NewDraggableWidget<T> 
     var localPosition = Offset.zero;
     final allowCreation = bodyConfiguration.allowEventCreation;
     final createEventTrigger = bodyConfiguration.createEventGesture;
-
     return Listener(
       onPointerDown: (event) => localPosition = event.localPosition,
       onPointerSignal: (event) => localPosition = event.localPosition,
@@ -48,17 +47,26 @@ class DayEventDraggableWidgets<T extends Object?> extends NewDraggableWidget<T> 
                     onDraggableCanceled: onDragFinished,
                     onDragEnd: onDragFinished,
                     data: Create(controllerId: controller.id),
-                    feedback: Container(color: Colors.transparent, width: 1, height: 1),
-                    child: Container(color: Colors.transparent, width: dayWidth, height: pageHeight),
+                    feedback: Container(
+                        color: Colors.transparent, width: 1, height: 1),
+                    child: Container(
+                        color: Colors.transparent,
+                        width: dayWidth,
+                        height: pageHeight),
                   ),
                 CreateEventGesture.longPress => LongPressDraggable(
+                    delay: const Duration(milliseconds: 200),
                     dragAnchorStrategy: pointerDragAnchorStrategy,
                     onDragStarted: () => createNewEvent(date, localPosition),
                     onDraggableCanceled: onDragFinished,
                     onDragEnd: onDragFinished,
                     data: Create(controllerId: controller.id),
-                    feedback: Container(color: Colors.transparent, width: 1, height: 1),
-                    child: Container(color: Colors.transparent, width: dayWidth, height: pageHeight),
+                    feedback: Container(
+                        color: Colors.transparent, width: 1, height: 1),
+                    child: Container(
+                        color: Colors.transparent,
+                        width: dayWidth,
+                        height: pageHeight),
                   ),
               },
         ],
@@ -83,7 +91,8 @@ class DayEventDraggableWidgets<T extends Object?> extends NewDraggableWidget<T> 
     final durationFromStart = localPosition.dy ~/ heightPerMinute;
     final snapIntervalMinutes = bodyConfiguration.snapIntervalMinutes;
     final numberOfIntervals = (durationFromStart / snapIntervalMinutes).round();
-    final durationFromTop = Duration(minutes: snapIntervalMinutes * numberOfIntervals);
+    final durationFromTop =
+        Duration(minutes: snapIntervalMinutes * numberOfIntervals);
 
     // Calculate the start of the day.
     final startOfDay = timeOfDayRange.start.toDateTime(date);

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kalender/kalender_extensions.dart';
-import 'package:kalender/src/models/calendar_events/calendar_event.dart';
-import 'package:kalender/src/models/controllers/view_controller.dart';
+import 'package:kalender/kalender.dart';
 import 'package:kalender/src/models/mixins/calendar_navigation_functions.dart';
-import 'package:kalender/src/calendar_view.dart';
 import 'package:kalender/src/models/mixins/new_event.dart';
 
 /// The [CalendarController] is used to controller a single [CalendarView].
@@ -12,7 +9,8 @@ import 'package:kalender/src/models/mixins/new_event.dart';
 /// The [CalendarView] attaches itself to the [CalendarController] by calling [attach].
 /// And detaches itself by calling [detach].
 ///
-class CalendarController<T extends Object?> extends ChangeNotifier with CalendarNavigationFunctions<T>, NewEvent<T> {
+class CalendarController<T extends Object?> extends ChangeNotifier
+    with CalendarNavigationFunctions<T>, NewEvent<T> {
   CalendarController({DateTime? initialDate})
       : initialDate = initialDate ?? DateTime.now(),
         id = DateTime.now().millisecondsSinceEpoch;
@@ -28,10 +26,14 @@ class CalendarController<T extends Object?> extends ChangeNotifier with Calendar
   bool get isAttached => _viewController != null;
 
   /// The [DateTimeRange] that is currently visible.
-  late final visibleDateTimeRange = ValueNotifier<DateTimeRange>(initialDate.dayRange);
+  late final visibleDateTimeRange =
+      ValueNotifier<DateTimeRange>(initialDate.dayRange);
 
   /// The [CalendarEvent]s that are currently visible.
   final visibleEvents = ValueNotifier<Set<CalendarEvent<T>>>({});
+
+  /// The [TimeRegionEvent]s that are currently visible.
+  final visibleTimeRegionEvents = ValueNotifier<Set<TimeRegionEvent<T>>>({});
 
   /// The event currently being focused on.
   final selectedEvent = ValueNotifier<CalendarEvent<T>?>(null);

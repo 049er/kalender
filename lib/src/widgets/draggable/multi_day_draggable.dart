@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:kalender/kalender.dart';
-import 'package:kalender/src/enumerations.dart';
 import 'package:kalender/src/models/calendar_events/draggable_event.dart';
 import 'package:kalender/src/widgets/draggable/new_draggable.dart';
 
-class MultiDayEventDraggableWidgets<T extends Object?> extends NewDraggableWidget<T> {
+class MultiDayEventDraggableWidgets<T extends Object?>
+    extends NewDraggableWidget<T> {
   final EventsController<T> eventsController;
   final DateTimeRange visibleDateTimeRange;
   final CreateEventGesture createEventTrigger;
@@ -41,8 +41,10 @@ class MultiDayEventDraggableWidgets<T extends Object?> extends NewDraggableWidge
                     onDragEnd: onDragFinished,
                     dragAnchorStrategy: pointerDragAnchorStrategy,
                     data: Create(controllerId: controller.id),
-                    feedback: Container(color: Colors.transparent, width: 1, height: 1),
-                    child: Container(color: Colors.transparent, width: dayWidth),
+                    feedback: Container(
+                        color: Colors.transparent, width: 1, height: 1),
+                    child:
+                        Container(color: Colors.transparent, width: dayWidth),
                   ),
                 CreateEventGesture.longPress => LongPressDraggable(
                     onDragStarted: () => createNewEvent(date, localPosition),
@@ -50,8 +52,10 @@ class MultiDayEventDraggableWidgets<T extends Object?> extends NewDraggableWidge
                     onDragEnd: onDragFinished,
                     dragAnchorStrategy: pointerDragAnchorStrategy,
                     data: Create(controllerId: controller.id),
-                    feedback: Container(color: Colors.transparent, width: 1, height: 1),
-                    child: Container(color: Colors.transparent, width: dayWidth),
+                    feedback: Container(
+                        color: Colors.transparent, width: 1, height: 1),
+                    child:
+                        Container(color: Colors.transparent, width: dayWidth),
                   ),
               },
         ],

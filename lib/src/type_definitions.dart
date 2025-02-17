@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kalender/src/models/calendar_events/calendar_event.dart';
+import 'package:kalender/src/models/calendar_events/time_region_event.dart';
 import 'package:kalender/src/models/time_of_day_range.dart';
 import 'package:kalender/src/widgets/components/day_header.dart';
 import 'package:kalender/src/widgets/components/day_separator.dart';
@@ -22,6 +23,17 @@ import 'package:kalender/src/widgets/components/week_number.dart';
 /// * (This can be compared to the [CalendarEvent.dateTimeRange] to determine on which day it falls.)
 typedef TileBuilder<T extends Object?> = Widget Function(
   CalendarEvent<T> event,
+  DateTimeRange tileRange,
+);
+
+/// The default builder for the time region event tiles.
+///
+/// [event] is the event that the tile will be built for.
+///
+/// [tileRange] is the [DateTimeRange] of the view the tile will be displayed in.
+/// * (This can be compared to the [CalendarEvent.dateTimeRange] to determine on which day it falls.)
+typedef TimeRegionTileBuilder<T extends Object?> = Widget Function(
+  TimeRegionEvent<T> event,
   DateTimeRange tileRange,
 );
 

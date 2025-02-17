@@ -5,7 +5,8 @@ import 'package:kalender/src/models/mixins/calendar_navigation_functions.dart';
 /// A controller for calendar views.
 ///
 /// A view controller lets you control a calendar view.
-abstract class ViewController<T extends Object?> with CalendarNavigationFunctions<T> {
+abstract class ViewController<T extends Object?>
+    with CalendarNavigationFunctions<T> {
   /// The view configuration that will be used by the controller.
   ViewConfiguration get viewConfiguration;
 
@@ -75,15 +76,21 @@ class MultiDayViewController<T extends Object?> extends ViewController<T> {
     DateTime? initialDate,
   }) {
     final pageNavigationFunctions = viewConfiguration.pageNavigationFunctions;
-    initialPage = pageNavigationFunctions.indexFromDate(initialDate ?? DateTime.now());
+    initialPage =
+        pageNavigationFunctions.indexFromDate(initialDate ?? DateTime.now());
 
     final type = viewConfiguration.type;
-    final viewPortFraction = type == MultiDayViewType.freeScroll ? 1 / viewConfiguration.numberOfDays : 1.0;
+    final viewPortFraction = type == MultiDayViewType.freeScroll
+        ? 1 / viewConfiguration.numberOfDays
+        : 1.0;
 
-    pageController = PageController(initialPage: initialPage, viewportFraction: viewPortFraction);
-    headerController = PageController(initialPage: initialPage, viewportFraction: viewPortFraction);
+    pageController = PageController(
+        initialPage: initialPage, viewportFraction: viewPortFraction);
+    headerController = PageController(
+        initialPage: initialPage, viewportFraction: viewPortFraction);
     numberOfPages = pageNavigationFunctions.numberOfPages;
-    heightPerMinute = ValueNotifier<double>(viewConfiguration.initialHeightPerMinute);
+    heightPerMinute =
+        ValueNotifier<double>(viewConfiguration.initialHeightPerMinute);
 
     final range = pageNavigationFunctions.dateTimeRangeFromIndex(initialPage);
 
@@ -93,16 +100,30 @@ class MultiDayViewController<T extends Object?> extends ViewController<T> {
         end: range.start.addDays(viewConfiguration.numberOfDays),
       );
     } else {
-      visibleDateTimeRange.value = pageNavigationFunctions.dateTimeRangeFromIndex(initialPage);
+      visibleDateTimeRange.value =
+          pageNavigationFunctions.dateTimeRangeFromIndex(initialPage);
     }
 
     // Calculate the scroll offset so that the initialTimeOfDay is aligned with the top.
-    final initialTimeOfDay = viewConfiguration.initialTimeOfDay.toDateTime(DateTime.now());
-    final dayStart = viewConfiguration.timeOfDayRange.start.toDateTime(DateTime.now());
+    final initialTimeOfDay =
+        viewConfiguration.initialTimeOfDay.toDateTime(DateTime.now());
+    final dayStart =
+        viewConfiguration.timeOfDayRange.start.toDateTime(DateTime.now());
     final timeDifference = initialTimeOfDay.difference(dayStart);
-    final initialScrollOffset = timeDifference.inMinutes * (heightPerMinute.value);
-    scrollController = ScrollController(initialScrollOffset: initialScrollOffset);
+    final initialScrollOffset =
+        timeDifference.inMinutes * (heightPerMinute.value);
+    scrollController =
+        ScrollController(initialScrollOffset: initialScrollOffset);
 
+    // ---- SHILO ADD THIS: to jump also to the time of the initial date not only tha date ----
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => animateToDateTime(
+        initialDate ?? DateTime.now().copyWith(hour: 0),
+        scrollDuration: const Duration(microseconds: 1),
+        pageDuration: const Duration(microseconds: 1),
+      ),
+    );
+    // ------------------------------------------------------------------------
     visibleEvents.value = {};
 
     // This listener will sync the headerController with the pageController.
@@ -148,7 +169,8 @@ class MultiDayViewController<T extends Object?> extends ViewController<T> {
     Curve? curve,
   }) {
     // Calculate the pageNumber of the date.
-    final pageNumber = viewConfiguration.pageNavigationFunctions.indexFromDate(date);
+    final pageNumber =
+        viewConfiguration.pageNavigationFunctions.indexFromDate(date);
     // Animate to that page.
     return pageController.animateToPage(
       pageNumber,
@@ -192,9 +214,12 @@ class MultiDayViewController<T extends Object?> extends ViewController<T> {
     final DateTime date;
 
     if (centerEvent) {
-      final eventCenter = event.start.add(Duration(minutes: event.duration.inMinutes ~/ 2));
-      final halfViewPortHeight = scrollController.position.viewportDimension ~/ 2;
-      final duration = Duration(minutes: halfViewPortHeight ~/ heightPerMinute.value);
+      final eventCenter =
+          event.start.add(Duration(minutes: event.duration.inMinutes ~/ 2));
+      final halfViewPortHeight =
+          scrollController.position.viewportDimension ~/ 2;
+      final duration =
+          Duration(minutes: halfViewPortHeight ~/ heightPerMinute.value);
       date = eventCenter.subtract(duration);
     } else {
       date = event.start;
@@ -227,7 +252,8 @@ class MultiDayViewController<T extends Object?> extends ViewController<T> {
 
   @override
   void jumpToDate(DateTime date) {
-    final pageNumber = viewConfiguration.pageNavigationFunctions.indexFromDate(date);
+    final pageNumber =
+        viewConfiguration.pageNavigationFunctions.indexFromDate(date);
     jumpToPage(pageNumber);
   }
 
@@ -248,7 +274,8 @@ class MonthViewController<T extends Object?> extends ViewController<T> {
     DateTime? initialDate,
   }) {
     final pageNavigationFunctions = viewConfiguration.pageNavigationFunctions;
-    initialPage = pageNavigationFunctions.indexFromDate(initialDate ?? DateTime.now());
+    initialPage =
+        pageNavigationFunctions.indexFromDate(initialDate ?? DateTime.now());
     pageController = PageController(initialPage: initialPage);
     numberOfPages = pageNavigationFunctions.numberOfPages;
     visibleDateTimeRange.value = pageNavigationFunctions.dateTimeRangeFromIndex(initialPage);
@@ -280,7 +307,8 @@ class MonthViewController<T extends Object?> extends ViewController<T> {
     Curve? curve,
   }) async {
     // Calculate the pageNumber of the date.
-    final pageNumber = viewConfiguration.pageNavigationFunctions.indexFromDate(date);
+    final pageNumber =
+        viewConfiguration.pageNavigationFunctions.indexFromDate(date);
 
     // Animate to that page.
     await pageController.animateToPage(

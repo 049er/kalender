@@ -45,9 +45,10 @@ class HourLines extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final thickness = style?.thickness ?? 1;
-    final color = style?.color ?? Theme.of(context).colorScheme.surfaceContainerHighest;
-    final indent = style?.indent ?? 40;
-    final endIndent = style?.endIndent ?? 0;
+    final color =
+        style?.color ?? Theme.of(context).colorScheme.surfaceContainerHighest;
+    // final indent = style?.indent ?? 40;
+    // final endIndent = style?.endIndent ?? 0;
 
     final hours = timeOfDayRange.hourRanges;
     var previousXPosition = 0.0;
@@ -62,7 +63,8 @@ class HourLines extends StatelessWidget {
           left: 0,
           right: 0,
           child: Container(
-            margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),
+            // ---- No need for that, now to hours line in inside each page ----
+            // margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),
             height: thickness,
             color: color,
           ),

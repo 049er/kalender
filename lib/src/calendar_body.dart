@@ -15,6 +15,9 @@ class CalendarBody<T extends Object?> extends StatelessWidget {
   /// The tile components used by the [MultiDayBody].
   final TileComponents<T> multiDayTileComponents;
 
+  /// The tile components for time regions used by the [MultiDayBody].
+  final TimeRegionTileComponents<T>? multiDayTimeRegionTileComponents;
+
   /// The [MultiDayBodyConfiguration] that will be used by the [MultiDayBody].
   final MultiDayBodyConfiguration? multiDayBodyConfiguration;
 
@@ -37,6 +40,7 @@ class CalendarBody<T extends Object?> extends StatelessWidget {
     this.calendarController,
     this.callbacks,
     required this.multiDayTileComponents,
+    this.multiDayTimeRegionTileComponents,
     this.multiDayBodyConfiguration,
     required this.monthTileComponents,
     this.monthBodyConfiguration,
@@ -45,7 +49,8 @@ class CalendarBody<T extends Object?> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     late final provider = CalendarProvider.maybeOf<T>(context);
-    final viewController = calendarController?.viewController ?? provider?.viewController;
+    final viewController =
+        calendarController?.viewController ?? provider?.viewController;
 
     assert(
       viewController != null,
@@ -60,6 +65,7 @@ class CalendarBody<T extends Object?> extends StatelessWidget {
         configuration: multiDayBodyConfiguration,
         callbacks: callbacks,
         tileComponents: multiDayTileComponents,
+        timeRegionTileComponents: multiDayTimeRegionTileComponents,
       );
     } else if (viewController is MonthViewController<T>) {
       return MonthBody<T>(

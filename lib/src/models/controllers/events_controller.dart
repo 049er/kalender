@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:kalender/kalender_extensions.dart';
 import 'package:kalender/src/models/calendar_events/calendar_event.dart';
+import 'package:kalender/src/models/controllers/date_map.dart';
+import 'package:kalender/src/models/controllers/time_region_controller.dart';
 
 /// A controller for [CalendarEvent]s.
 ///
 /// This is used to store and manage the [CalendarEvent]s.
-class EventsController<T extends Object?> with ChangeNotifier {
+class EventsController<T extends Object?>
+    with ChangeNotifier, TimeRegionController<T> {
   ValueNotifier<Size> feedbackWidgetSize = ValueNotifier(Size.zero);
 
   /// The list of [CalendarEvent]s.
@@ -15,6 +17,7 @@ class EventsController<T extends Object?> with ChangeNotifier {
   /// A Map of dates and event ids.
   final DateMap _dateMap = DateMap();
 
+  /// The ids for the [CalendarEvent]s
   int _lastId = 0;
   int get _nextId {
     _lastId++;
@@ -41,7 +44,8 @@ class EventsController<T extends Object?> with ChangeNotifier {
 
   /// Removes an [CalendarEvent] from the list of [CalendarEvent]s.
   void removeEvent(CalendarEvent<T> event) {
-    assert(event.id != -1, 'The id of the event must be set before removing it.');
+    assert(
+        event.id != -1, 'The id of the event must be set before removing it.');
     _events.remove(event.id);
     _dateMap.removeEvent(event);
     notifyListeners();
@@ -116,7 +120,8 @@ class EventsController<T extends Object?> with ChangeNotifier {
     final events = eventIds.map((id) => _events[id]).nonNulls;
 
     if (includeMultiDayEvents && includeDayEvents) {
-      return events.where((event) => event.occursDuringDateTimeRange(dateTimeRange));
+      return events
+          .where((event) => event.occursDuringDateTimeRange(dateTimeRange));
     } else if (includeMultiDayEvents) {
       return _multiDayEventsFromDateTimeRange(events, dateTimeRange);
     } else if (includeDayEvents) {
@@ -148,55 +153,5 @@ class EventsController<T extends Object?> with ChangeNotifier {
       if (event.isMultiDayEvent) return false;
       return event.occursDuringDateTimeRange(dateTimeRange);
     });
-  }
-}
-
-/// A class for searching the events by date more efficient.
-class DateMap {
-  /// Map of the [DateTime] and event ids.
-  final Map<DateTime, Set<int>> _dateMap = {};
-
-  /// Clear the [_dateMap].
-  void clear() => _dateMap.clear();
-
-  /// Add an [event] to the map.
-  void addEvent(CalendarEvent event) {
-    final id = event.id;
-    final dates = event.datesSpannedAsUtc;
-    for (final date in dates) {
-      _dateMap.update(
-        date,
-        (value) => value..add(id),
-        ifAbsent: () => {id},
-      );
-    }
-  }
-
-  /// Remove an [event] from the map.
-  void removeEvent(CalendarEvent event) {
-    final id = event.id;
-    final dates = event.datesSpannedAsUtc;
-    for (final date in dates) {
-      _dateMap.update(
-        date,
-        (value) => value..remove(id),
-      );
-    }
-  }
-
-  /// Update an [event] in the map with the [updatedEvent].
-  void updateEvent(CalendarEvent event, CalendarEvent updatedEvent) {
-    removeEvent(event);
-    addEvent(updatedEvent);
-  }
-
-  /// Retrieve a [Set] of event id's from the map.
-  Set<int> eventIdsFromDateTimeRange(DateTimeRange dateTimeRange) {
-    final days = dateTimeRange.asUtc.days;
-    final eventIds = <int>{};
-    for (final day in days) {
-      eventIds.addAll(_dateMap[day] ?? {});
-    }
-    return eventIds;
   }
 }

@@ -46,9 +46,11 @@ class DayEventsWidget<T extends Object?> extends StatefulWidget {
   State<DayEventsWidget<T>> createState() => _DayEventsWidgetState<T>();
 }
 
-class _DayEventsWidgetState<T extends Object?> extends State<DayEventsWidget<T>> {
+class _DayEventsWidgetState<T extends Object?>
+    extends State<DayEventsWidget<T>> {
   /// The visible events value notifier.
-  ValueNotifier<Set<CalendarEvent<T>>> get visibleEvents => widget.controller.visibleEvents;
+  ValueNotifier<Set<CalendarEvent<T>>> get visibleEvents =>
+      widget.controller.visibleEvents;
 
   /// A map containing all the days and Events that will be displayed.
   late Map<DateTime, Iterable<CalendarEvent<T>>> eventsMap;
@@ -147,13 +149,16 @@ class _DayEventsWidgetState<T extends Object?> extends State<DayEventsWidget<T>>
           builder: (context, event, child) {
             // If there is no event being dragged, return an empty widget.
             if (event == null) return const SizedBox();
-            if (!event.occursDuringDateTimeRange(date.dayRange)) return const SizedBox();
-            if (!showMultiDayEvents && event.isMultiDayEvent) return const SizedBox();
+            if (!event.occursDuringDateTimeRange(date.dayRange))
+              return const SizedBox();
+            if (!showMultiDayEvents && event.isMultiDayEvent)
+              return const SizedBox();
 
             final events = visibleEvents.toList();
 
             // Find the index of the selected event.
-            final index = visibleEvents.indexWhere((e) => e.id == widget.controller.selectedEventId);
+            final index = visibleEvents
+                .indexWhere((e) => e.id == widget.controller.selectedEventId);
             if (index != -1) {
               // If it exists override it with the selectedEvent.
               events[index] = event;
@@ -165,12 +170,14 @@ class _DayEventsWidgetState<T extends Object?> extends State<DayEventsWidget<T>>
             final dropTarget = widget.tileComponents.dropTargetTile;
 
             return CustomMultiChildLayout(
-              delegate: layoutStrategy.call(events, date, widget.timeOfDayRange, widget.heightPerMinute),
+              delegate: layoutStrategy.call(
+                  events, date, widget.timeOfDayRange, widget.heightPerMinute),
               children: events.indexed.map(
                 (item) {
                   final event = item.$2;
-                  final drawTile =
-                      dropTarget != null && (event.id == -1 || event.id == widget.controller.selectedEventId);
+                  final drawTile = dropTarget != null &&
+                      (event.id == -1 ||
+                          event.id == widget.controller.selectedEventId);
 
                   return LayoutId(
                     id: item.$1,
@@ -187,7 +194,8 @@ class _DayEventsWidgetState<T extends Object?> extends State<DayEventsWidget<T>>
             fit: StackFit.expand,
             children: [
               Positioned.fill(child: events),
-              Positioned.fill(child: PassThroughPointer(child: dropTargetWidget)),
+              Positioned.fill(
+                  child: PassThroughPointer(child: dropTargetWidget)),
             ],
           ),
         );
