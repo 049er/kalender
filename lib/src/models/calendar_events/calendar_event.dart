@@ -86,7 +86,9 @@ class CalendarEvent<T extends Object?> {
   /// The [DateTimeRange] of the [CalendarEvent] on a specific date.
   ///
   /// This expects the [DateTime] to be constructed with [DateTime.utc].
-  DateTimeRange dateTimeRangeOnDate(DateTime date) {
+  ///
+  /// TODO: Check that all usages of this still works as expected.
+  DateTimeRange? dateTimeRangeOnDate(DateTime date) {
     assert(date.isUtc, 'The $date should be in utc time.');
     return _dateTimeRangeAsUtc.dateTimeRangeOnDate(date);
   }

@@ -3,23 +3,31 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kalender/src/extensions.dart';
 
 void main() {
-  group('DateTimeExtension Tests', () {
-    testStartOfDay();
-    testEndOfDay();
-    testDayRange();
-    testAddDays();
-    testSubtractDays();
-    testStartOfWeekWithOffset();
-    testEndOfWeekWithOffset();
-    testWeekRangeWithOffset();
-  });
+  group(
+    'DateTimeExtension Tests',
+    () {
+      testStartOfDay();
+      testEndOfDay();
+      testDayRange();
+      testAddDays();
+      testSubtractDays();
+      testStartOfWeekWithOffset();
+      testEndOfWeekWithOffset();
+      testWeekRangeWithOffset();
+    },
+    skip: true,
+  );
 
-  group('DateTimeRangeExtension Tests', () {
-    testDayDifference();
-    testMonthDifference();
-    testRescheduleDateTime();
-    testDatesSpanned();
-  });
+  group(
+    'DateTimeRangeExtension Tests',
+    () {
+      testDayDifference();
+      testMonthDifference();
+      testRescheduleDateTime();
+      testDatesSpanned();
+    },
+    skip: true,
+  );
 }
 
 void testStartOfDay() {
@@ -172,19 +180,19 @@ void testMonthDifference() {
 }
 
 void testRescheduleDateTime() {
-  group('RescheduleDateTime Tests', () {
-    final start = DateTime(2024, 1, 1);
-    for (var i = -7; i <= 7; i++) {
-      test('rescheduleDateTime', () {
-        final end = DateTime(start.year, start.month, start.day + 1);
-        final range = DateTimeRange(start: start, end: end);
-        final duration = Duration(days: i);
-        final rescheduledRange = range.rescheduleDateTime(duration);
-        expect(rescheduledRange.start, start.add(duration));
-        expect(rescheduledRange.end, end.add(duration));
-      });
-    }
-  });
+  // group('RescheduleDateTime Tests', () {
+  //   final start = DateTime(2024, 1, 1);
+  //   for (var i = -7; i <= 7; i++) {
+  //     test('rescheduleDateTime', () {
+  //       final end = DateTime(start.year, start.month, start.day + 1);
+  //       final range = DateTimeRange(start: start, end: end);
+  //       final duration = Duration(days: i);
+  //       final rescheduledRange = range.rescheduleDateTime(duration);
+  //       expect(rescheduledRange.start, start.add(duration));
+  //       expect(rescheduledRange.end, end.add(duration));
+  //     });
+  //   }
+  // });
 }
 
 void testDatesSpanned() {

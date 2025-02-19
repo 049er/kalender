@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 
+/// An extension on the [DateTimeRange] class that provides helpful methods.
 extension DateTimeRangeExtensions on DateTimeRange {
-  /// The time difference in days between the [start] and [end] of the [DateTimeRange].
+  /// The time difference in days between the [start] and [end] of this range.
+  ///
+  /// This calculates the difference in days using UTC time to ensure consistent
+  /// results regardless of time zones.
+  ///
+  /// Example:
+  /// ```dart
+  /// final range = DateTimeRange(start: DateTime(2024, 1, 1), end: DateTime(2024, 1, 31));
+  /// print(range.dayDifference); // Output: 30
+  /// ```
   int get dayDifference {
     final startDate = start.asUtc;
     final endDate = end.asUtc;
@@ -9,16 +19,21 @@ extension DateTimeRangeExtensions on DateTimeRange {
     return difference;
   }
 
-  /// The month difference between the [start] and [end] of the [DateTimeRange].
+  /// The difference in months between the [start] and [end] dates of this range.
+  ///
+  /// This calculates the absolute difference in years, multiplies by 12, and then
+  /// adds the difference in months.  It handles cases where the start and end
+  /// dates are in different years or have different days of the month.
+  ///
+  /// Example:
+  /// ```dart
+  /// final range = DateTimeRange(start: DateTime(2024, 1, 1), end: DateTime(2025, 6, 1));
+  /// print(range.monthDifference); // Output: 17
+  /// ```
   int get monthDifference {
     var months = ((start.year - end.year).abs() - 1) * 12;
     months += end.month + (12 - start.month);
     return months;
-  }
-
-  /// Returns a new [DateTimeRange] with the [start] and [end] offset by the given [duration].
-  DateTimeRange rescheduleDateTime(Duration duration) {
-    return DateTimeRange(start: start.add(duration), end: end.add(duration));
   }
 
   /// Generates a list of [DateTime] objects representing the dates within this [DateTimeRange].
@@ -78,49 +93,90 @@ extension DateTimeRangeExtensions on DateTimeRange {
     return dates;
   }
 
-  /// A list of [DateTime]s that the [DateTimeRange] spans.
+  /// Returns a [DateTimeRange] representing the portion of this [DateTimeRange]
+  /// that falls on the given [date], or `null` if the [date] is not within this range.
   ///
-  /// Includes the [start] date.
-  /// Includes the [end] date only if it is not the start of the day. (after 00:00:00)
-  List<DateTime> get days {
-    final start = this.start.asUtc;
-    final end = this.end.asUtc;
+  /// This method calculates the intersection of this [DateTimeRange] with the
+  /// specified [date].  It handles cases where the [date] is the same as the
+  /// start or end of the range, or if it falls within the range.  If the [date]
+  /// is outside the range, it returns `null`.
+  ///
+  /// Example:
+  /// ```dart
+  /// final range = DateTimeRange(start: DateTime(2024, 1, 1), end: DateTime(2024, 1, 31));
+  /// final date = DateTime(2024, 1, 15);
+  /// final rangeOnDate = range.dateTimeRangeOnDate(date);
+  /// print(rangeOnDate?.start); // Output: 2024-01-15 00:00:00.000
+  /// print(rangeOnDate?.end);   // Output: 2024-01-15 23:59:59.999
+  ///
+  /// final range2 = DateTimeRange(start: DateTime(2024, 1, 1), end: DateTime(2024, 1, 1));
+  /// final date2 = DateTime(2024, 1, 1);
+  /// final rangeOnDate2 = range2.dateTimeRangeOnDate(date2);
+  /// print(rangeOnDate2?.start); // Output: 2024-01-01 00:00:00.000
+  /// print(rangeOnDate2?.end);   // Output: 2024-01-01 23:59:59.999
+  ///
+  /// final dateOutsideRange = DateTime(2024, 2, 1);
+  /// final rangeOnDateOutside = range.dateTimeRangeOnDate(dateOutsideRange);
+  /// print(rangeOnDateOutside); // Output: null
+  /// ```
+  DateTimeRange? dateTimeRangeOnDate(DateTime date) {
+    // Check if the given date is outside the range. If so, return null.
+    if (!date.isDuring(this)) return null;
 
-    if (start.isSameDay(end)) return [this.start.startOfDay];
+    // Check if the start and end dates are the same day. If so, the entire range is on that day.
+    if (start.isSameDay(end)) return this;
 
-    final dateTimeRange = DateTimeRange(
-      start: start.startOfDay,
-      end: end.startOfDay == end ? end.startOfDay : end.endOfDay,
-    );
+    // Check if the given date is the same as the start date.
+    if (date.isSameDay(start)) return DateTimeRange(start: start, end: start.endOfDay);
 
-    final numberOfDays = dateTimeRange.dayDifference;
-    final dates = <DateTime>[];
-    for (var i = 0; i < numberOfDays; i++) {
-      dates.add(this.start.startOfDay.add(Duration(days: i)));
-    }
-    return dates;
+    // Check if the given date is the same as the end date.
+    if (date.isSameDay(end)) return DateTimeRange(start: end.startOfDay, end: end);
+
+    // If none of the above conditions are met, the date must be within the range
+    // but not the start or end date.
+    return DateTimeRange(start: date.startOfDay, end: date.endOfDay);
   }
 
-  /// The [DateTimeRange] of the [DateTime] on a specific date.
-  DateTimeRange dateTimeRangeOnDate(DateTime date) {
-    if (start.isSameDay(end)) {
-      // The start and end are on same day.
-      return this;
-    } else {
-      if (date.isSameDay(start)) {
-        // The date is the same as the start.
-        return DateTimeRange(start: start, end: start.endOfDay);
-      } else if (date.isSameDay(end)) {
-        // The date is the same as the end.
-        return DateTimeRange(start: end.startOfDay, end: end);
-      } else {
-        // The date is between the start and end.
-        return DateTimeRange(
-          start: date.startOfDay,
-          end: date.endOfDay,
-        );
-      }
-    }
+  /// Checks if the [DateTimeRange] overlaps with another [DateTimeRange].
+  ///
+  /// Two [DateTimeRange] objects overlap if they share any common time interval.
+  /// This method checks if the start of one range is before the end of the other,
+  /// AND the end of the first range is after the start of the second.
+  ///
+  /// **Important Note:** This method does *not* consider ranges that only "touch"
+  /// at the start and end times.
+  ///
+  /// Example:
+  /// ```dart
+  /// final range1 = DateTimeRange(start: DateTime(2024, 1, 1), end: DateTime(2024, 1, 10));
+  /// final range2 = DateTimeRange(start: DateTime(2024, 1, 5), end: DateTime(2024, 1, 15));
+  /// print(range1.overlaps(range2)); // Output: true
+  ///
+  /// final range3 = DateTimeRange(start: DateTime(2024, 1, 1), end: DateTime(2024, 1, 5));
+  /// final range4 = DateTimeRange(start: DateTime(2024, 1, 5), end: DateTime(2024, 1, 10));
+  /// print(range3.overlaps(range4)); // Output: false (only touching)
+  /// ```
+  bool overlaps(DateTimeRange other, {bool touching = false}) {
+    return start.isBefore(other.end) && end.isAfter(other.start);
+  }
+
+  /// TODO: Consider the following extensions more
+
+  /// Check if the [dateTimeRange] occurs during this.
+  bool occursDuring(DateTimeRange dateTimeRange) {
+    final rangeStart = dateTimeRange.start;
+    final rangeEnd = dateTimeRange.end;
+
+    // Check if this starts before the range and ends after the range.
+    final startsBeforeEndsAfter = (start.isBefore(rangeStart) && end.isAfter(rangeEnd));
+
+    // Check if the event is within the range.
+    final isWithin = start.isWithin(dateTimeRange) || end.isWithin(dateTimeRange);
+
+    // Check if the start or end of the event is equal to the start or end of the range.
+    final isStartOrEndSameMoment = start.isAtSameMomentAs(rangeStart) || end.isAtSameMomentAs(rangeEnd);
+
+    return startsBeforeEndsAfter || isWithin || isStartOrEndSameMoment;
   }
 
   /// Returns the weekNumber(s) that the [DateTimeRange] spans.
@@ -161,26 +217,27 @@ extension DateTimeRangeExtensions on DateTimeRange {
     }
   }
 
-  /// Checks if the [DateTimeRange] overlaps with another [DateTimeRange].
-  bool overlaps(DateTimeRange other) {
-    return start.isBefore(other.end) && end.isAfter(other.start);
-  }
+  /// A list of [DateTime]s that the [DateTimeRange] spans.
+  ///
+  /// Includes the [start] date.
+  /// Includes the [end] date only if it is not the start of the day. (after 00:00:00)
+  List<DateTime> get days {
+    final start = this.start.asUtc;
+    final end = this.end.asUtc;
 
-  /// Check if the [dateTimeRange] occurs during this.
-  bool occursDuring(DateTimeRange dateTimeRange) {
-    final rangeStart = dateTimeRange.start;
-    final rangeEnd = dateTimeRange.end;
+    if (start.isSameDay(end)) return [this.start.startOfDay];
 
-    // Check if the event starts before the range and ends after the range.
-    final startsBeforeEndsAfter = (start.isBefore(rangeStart) && end.isAfter(rangeEnd));
+    final dateTimeRange = DateTimeRange(
+      start: start.startOfDay,
+      end: end.startOfDay == end ? end.startOfDay : end.endOfDay,
+    );
 
-    // Check if the event is within the range.
-    final isWithin = start.isWithin(dateTimeRange) || end.isWithin(dateTimeRange);
-
-    // Check if the start or end of the event is equal to the start or end of the range.
-    final isStartOrEndSameMoment = start.isAtSameMomentAs(rangeStart) || end.isAtSameMomentAs(rangeEnd);
-
-    return startsBeforeEndsAfter || isWithin || isStartOrEndSameMoment;
+    final numberOfDays = dateTimeRange.dayDifference;
+    final dates = <DateTime>[];
+    for (var i = 0; i < numberOfDays; i++) {
+      dates.add(this.start.startOfDay.add(Duration(days: i)));
+    }
+    return dates;
   }
 
   /// Check if the [start] and [end] times are in utc.
@@ -197,6 +254,11 @@ extension DateTimeExtensions on DateTime {
   /// Checks if the [DateTime] is within the [DateTimeRange].
   bool isWithin(DateTimeRange dateTimeRange) {
     return isAfter(dateTimeRange.start) && isBefore(dateTimeRange.end);
+  }
+
+  bool isDuring(DateTimeRange dateTimeRange) {
+    return (isAtSameMomentAs(dateTimeRange.start) || isAfter(dateTimeRange.start)) &&
+        (isAtSameMomentAs(dateTimeRange.end) || isBefore(dateTimeRange.end));
   }
 
   /// Checks if the [DateTime] is the same day as the calling object.
