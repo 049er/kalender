@@ -64,7 +64,7 @@ class CalendarEvent<T extends Object?> {
   /// This expects the [DateTimeRange]'s start and end dates to be constructed in the [DateTime.utc] format.
   bool occursDuringDateTimeRange(DateTimeRange dateTimeRange) {
     assert(dateTimeRange.isUtc);
-    return _dateTimeRangeAsUtc.occursDuring(dateTimeRange);
+    return _dateTimeRangeAsUtc.overlaps(dateTimeRange);
   }
 
   /// Whether the [CalendarEvent] continues before the given [DateTime].
@@ -86,7 +86,9 @@ class CalendarEvent<T extends Object?> {
   /// The [DateTimeRange] of the [CalendarEvent] on a specific date.
   ///
   /// This expects the [DateTime] to be constructed with [DateTime.utc].
-  DateTimeRange dateTimeRangeOnDate(DateTime date) {
+  ///
+  /// TODO: Check that all usages of this still works as expected.
+  DateTimeRange? dateTimeRangeOnDate(DateTime date) {
     assert(date.isUtc, 'The $date should be in utc time.');
     return _dateTimeRangeAsUtc.dateTimeRangeOnDate(date);
   }
